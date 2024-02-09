@@ -1,0 +1,261 @@
+UDF definition for visco
+
+\begin{header}
+\begin{def}
+	EngineType:string
+	EngineVersion:string
+	IOType:string
+	ProjectName:string
+	Action:string
+	Comment:string
+\end{def}
+\begin{data}
+	EngineType:"VANILLA"
+	EngineVersion:"0.5"
+	IOType:"INOUT"
+	ProjectName:"--"
+	Action:"VANILLA.act;"
+	Comment:"UDF definition file for Visco\n"
+\end{data}
+\end{header}
+\begin{def}
+
+class Vector3d:{
+	x:double
+	y:double
+	z:double
+}
+class Tensor3d:{
+	xx:double
+	xy:double
+	xz:double
+	//yx:double
+	yy:double
+	yz:double
+	//zx:double
+	//zy:double
+	zz:double
+}
+
+class ChainID:{
+	componentID:int
+	blockID:int
+}
+class Segment:{
+	name:					string
+	size:					double	"radius(RPA)"
+	bulk_modulus:			double	"bulk modulus(ViscoElastic)"
+	shear_modulus:			double	"shear modulus(ViscoElastic)"
+	bulk_relaxation_time:	double	"bulk relaxation time(ViscoElastic)"
+	shear_relaxation_time:	double	"shear relaxation time(ViscoElastic)"
+	friction:				double	"friction(ViscoElastic)"
+	interfacial_tension:	double	"interfacial tension coefficient(FHdG)"
+}
+
+class Block:{
+	constituting_segment:		string	"segment name"
+	degree_of_polymerization:	double	"initial degree of polymerization"
+}
+
+class Component:{
+	name:						string	"polymer/solvent name"
+	volume_fraction:			double	"initial volume fraction"
+	//block[]:Block
+	segment:					string	"segment name"
+	degree_of_polymerization:	double	"initial degree of polymerization"
+}
+
+class ChiParameter:{
+	segment_name1:string
+	segment_name2:string
+	parameter:double
+}"unidentified parameters are set to 0"
+
+class RestartParameter:{
+	restart_record:int "-1 for generate initial condition"
+}
+class RandomParameter:{
+	random_seed:select{
+		"constant",
+		"random"
+	} "random seed for create initial state\n random depends on CPU time"
+	random_sigma:double "gaussian random sigma for initial fields"
+	//smoothing_iteration:int
+}
+
+class InitialConditions:{
+	density_initialize:select{
+		"random",
+		"restart"
+	} "initialize method"
+	random:RandomParameter
+	restart:RestartParameter
+}
+
+class OutputDataFlag:{
+	velocity_field:select{
+		"yes",
+		"no"
+	} "output flag for velocity field"
+	stress_field:select{
+		"yes",
+		"no"
+	} "output flag for stress field"
+}
+class MeshConditions:{
+	number_of_mesh:{
+		Nx:arraysize
+		Ny:arraysize
+		Nz:arraysize
+	} "number of mesh, Nx, Ny, Nz\n system sizes are Lx = Nx*dx,..."
+	mesh_size:{
+		dx:double
+		dy:double
+		dz:double
+	} "mesh size dx, dy, dz"
+}
+
+
+class FirstOrder:{
+	reactant:int
+	product:int
+	reaction_rate:double//k1
+	//reaction_interval:int
+}
+
+class SecondOrder:{
+	reactant1:int
+	reactant2:int
+	product:int
+	reaction_rate:double//k2
+	//reaction_interval:int
+}
+
+class ChainGrowth:{
+	reactant:int
+	product:int
+	reaction_rate:double
+	//reaction_interval:int
+}
+
+class Reaction:{
+	model:select{
+		"first_order",
+		"second_order",
+		"chain_growth"
+	}
+	first_order:FirstOrder
+	second_order:SecondOrder
+	chain_growth:ChainGrowth
+}
+
+class TDGL:{
+	delta_t:double 			"Time step of integration, delta t"
+}
+class ViscoElastic:{
+	delta_t:double 			"Time step of integration, delta t"
+	Ne:double			"entanglement segments"
+	critical_phi:double	"critical polymer entanglement density"
+	converge:double	"converge threshold(1e-12?)"
+	omega_SOR:double	"less than 2.0"
+	model:select{
+		"MAC-Gauss_Seidel",
+		"MAC-Jacobi",
+		"MAC-SOR"
+	}
+}
+
+class DynamicsSelect:{
+	model:select{
+		"time_depend_Ginzburg_Landau",
+		"visco_elastic"
+	}
+	time_depend_Ginzburg_Landau:TDGL
+	visco_elastic:ViscoElastic
+}
+
+class FHdG:{
+	dummy_parameter:double
+}
+class RPA:{
+	compressibility:double"recommend less than 1e-10"
+}
+
+class EnergySelect:{
+	model:select{
+		"Flory_Huggins_deGennes"
+	}
+	//model:select{
+	//	"Flory_Huggins_deGennes",
+	//	"Random_Phase_Approximation"
+	//}
+	//Flory_Huggins_deGennes:FHdG
+	//Random_Phase_Approximation:RPA
+}
+
+\end{def}
+
+\begin{global_def}
+/////////////////////////////////////////////////////////
+//                INPUT definition                     //
+/////////////////////////////////////////////////////////
+simulation_conditions:{
+	mesh_conditions:MeshConditions
+	total_records:int			"output records"
+	output_interval_steps:int	"Interval of time steps for output data"
+	variable_dt:select{
+		"yes",
+		"no"
+	}
+	output_data_flag:OutputDataFlag "output flags"
+}"Input for general simulation conditions"
+
+component_properties:{
+	segment[]:Segment
+	components[]:Component
+	chi_parameter[]:ChiParameter
+}
+
+dynamics:DynamicsSelect
+
+free_energy:EnergySelect
+
+reaction:{
+	reaction[]:Reaction
+	interval:int
+}
+
+initial_conditions:InitialConditions
+\end{global_def}
+
+/////////////////////////////////////////////////////////
+//                OUTPUT definition                    //
+/////////////////////////////////////////////////////////
+
+\begin{def}
+class OutputBlock:{
+	constituting_segment:		string	"segment name"
+	degree_of_polymerization:	double	"initial degree of polymerization"
+	density[]:					double
+	velocity[]:					Vector3d
+}
+
+class OutputComponents:{
+	name:						string	"polymer/solvent name"
+	volume_fraction:			double	"initial volume fraction"
+	//block[]:OutputBlock
+	density[]:					double
+	velocity[]:					Vector3d
+	shear_stress[]:	Tensor3d
+	bulk_stress[]:	double
+}
+
+\end{def}
+\begin{def}
+output:{
+	steps:			int	"current step"
+	time:			double	"current time"
+	free_energy:	double	"current free energy per unit volume"
+	components[]:	OutputComponents
+}
+\end{def}

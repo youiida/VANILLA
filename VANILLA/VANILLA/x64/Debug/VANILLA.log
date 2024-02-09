@@ -1,0 +1,12 @@
+﻿  Vector3d.cpp
+  Vector3c.cpp
+c:\octa\octa8.3\gourmet\include\pfexception.h(89): warning C4290: C++ の例外の指定は無視されます。関数が __declspec(nothrow) でないことのみ表示されます。
+c:\octa\octa8.3\gourmet\include\pfexception.h(90): warning C4290: C++ の例外の指定は無視されます。関数が __declspec(nothrow) でないことのみ表示されます。
+  VANILLA_main.cpp
+  Stress.cpp
+  MyTools.cpp
+  FreeEnergy.cpp
+  Field.cpp
+  DataIO.cpp
+  コードを生成中...
+  VANILLA.vcxproj -> C:\Users\youiida\Dropbox\work\programs\VANILLA\x64\Debug\VANILLA.exe

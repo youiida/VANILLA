@@ -1,0 +1,75 @@
+import lib_VANILLA_plot
+import lib_VANILLA_show
+import lib_VANILLA_base
+
+action component_properties : plot_phase_diagram(type="binodal|spinodal", csv_file="yes|no", index1=0, index2=1, dev=100 , max_plus=-1) : \begin
+lib_VANILLA_plot.phase_diagram(_udf_, index1, index2, dev, max_plus, type, csv_file)
+\end
+
+action reaction : plot_reaction_estimate(index=0) : \begin
+lib_VANILLA_plot.reaction_estimation(_udf_,index)
+\end
+
+action output.free_energy : plot(time = "record|time") : \begin
+lib_VANILLA_plot.free_energy(_udf_, time)
+\end
+
+action output : show_density(show_type = "segment_type|component_index", list = [], contour_color = "rainbow|blue_red|whiteblack", range_max = -1.0, range_min = -1.0, interval = 1) : \begin
+
+if show_type=="segment_type":
+	component_index = lib_VANILLA_base.getIndex(_udf_, show_type, list)
+elif show_type=="component_index":
+	component_index = list
+else:
+	print("invalid show type")
+	exit()
+print(component_index)
+frame_attr	=	[1,1,1,0.5]
+
+lib_VANILLA_show.density(_udf_, component_index, frame_attr, contour_color, range_max, range_min)
+\end
+
+action output : check_local_conservation() : \begin
+comps = _udf_.size("output.components[]")
+size  = _udf_.size("output.components[].density[]",[0])
+print(comps,size)
+for s in range(size):
+	sum = 0.0
+	for c in range(comps):
+		sum = sum + _udf_.get("output.components[].density[]",[c,s])
+	print("index:",s,"\ttotal_density:",sum)
+\end
+
+action output : plot_volume_fraction() : \begin
+lib_VANILLA_plot.volume_fraction(_udf_)
+\end
+
+action output : show_stress(type="mises|bulk|xx|xy|xz|yy|yz|zz", component_index=0, threshold = 0.0, contour_color = "rainbow|blue_red|whiteblack") : \begin
+frame_attr	=	[1,1,1,0.5]
+lib_VANILLA_show.stress(_udf_, frame_attr, contour_color, threshold, type, component_index)
+\end
+
+action output : plot_concentration_distribution(component_index=0, record_interval = 50) : \begin
+lib_VANILLA_plot.concentration_distribution(_udf_, record_interval, component_index)
+\end
+
+#action output : plot_rich_phase_rate(component_index=0, threshold=-1): \begin
+#lib_VANILLA_plot.rich_phase_rate(_udf_, component_index, threshold)
+#\end
+
+#action output : plot_surface_area(component_index=0, time="record|time") : \begin
+#lib_VANILLA_plot.surface_area(_udf_, component_index, time)
+#\end
+
+#action output : plot_scattering1d(component_index=0) : \begin
+#lib_VANILLA_plot.scattering1d(_udf_,component_index)
+#\end
+
+action output : export_cognac_density(filename="cognac_density",lx=100.0,ly=100.0,lz=100.0) : \begin
+lib_VANILLA_base.export_cognac(_udf_, filename, lx, ly, lz)
+\end
+
+#action output : export_density_biased_filler(filename="filler", flist, beta=10.0, lx=100.0,ly=100.0,lz=100.0) : \begin
+##filler_list = [[name,vol,size,bias]]
+#lib_VANILLA_base.export_filler(_udf_, filename, flist, beta, lx, ly, lz)
+#\end

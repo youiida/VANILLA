@@ -1,0 +1,15 @@
+﻿  DataIO.cpp
+  Field.cpp
+  MyTools.cpp
+  Stress.cpp
+  VANILLA_main.cpp
+  Vector3c.cpp
+c:\octa\octa8.3\gourmet\include\pfexception.h(89): warning C4290: C++ の例外の指定は無視されます。関数が __declspec(nothrow) でないことのみ表示されます。
+c:\octa\octa8.3\gourmet\include\pfexception.h(90): warning C4290: C++ の例外の指定は無視されます。関数が __declspec(nothrow) でないことのみ表示されます。
+  Vector3d.cpp
+  コード生成しています。
+  1833 of 2008 functions (91.3%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    34 functions had inline decision re-evaluated but remain unchanged
+  コード生成が終了しました。
+  VANILLA.vcxproj -> C:\Users\youiida\Dropbox\work\programs\VANILLA\x64\Release\VANILLA.exe
